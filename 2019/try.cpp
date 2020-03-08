@@ -2,79 +2,61 @@
 #include <queue>
 #include <vector>
 #include <string>
+#include <algorithm>
+#include <unordered_map>
+#include <sstream>
+
 using namespace std;
 
-class node
-{
-public:
-    int freq = 0;
-    string data = "";
-    node *left = NULL;
-    node *right = NULL;
-    node(int freq, string data, node *left, node *right)
-    {
-        this->data = data;
-        this->freq = freq;
-        this->left = left;
-        this->right = right;
-    }
-};
-
-class MyCompare
-{
-public:
-    bool operator()(node *a, node *b)
-    {
-        return (*a).freq > (*b).freq;
-    }
-};
-
-void tree(priority_queue<node *, vector<node *>, MyCompare> &pq)
-{
-    while (pq.size() != 1)
-    {
-        node *n1 = pq.top();
-        cout << n1->freq << " ";
-        pq.pop();
-        node *n2 = pq.top();
-        cout << n2->freq << " ";
-        pq.pop();
-        int f1 = n1->freq;
-        int f2 = n2->freq;
-        int tot_ = f1 + f2;
-        string final = n1->data + n2->data;
-        node *f = new node(tot_, final, n1, n2);
-        pq.push(f);
-        cout << endl;
-    }
-}
-void initialise(string s)
-{
-    priority_queue<node *, vector<node *>, MyCompare> pq;
-    vector<int> freq(26, 0);
-    for (int i = 0; i < s.size(); i++)
-    {
-        int idx = s[i] - 'a';
-        freq[idx]++;
-    }
-
-    for (int j = 0; j < freq.size(); j++)
-    {
-        if (freq[j] > 0)
-        {
-            // cout<<"freq"<<j<<" ";
-            // cout<<freq[j]<<" ";
-            string d = "";
-            d += char(j + 'a');
-            //cout<<char(j+'a')<<" ";
-            // cout<<d<<" ";
-            node *g = new node(freq[j], d, NULL, NULL);
-            pq.push(g);
-        }
-    }
-    tree(pq);
-}
+unordered_map<string, vector<int>> map;
 
 int main()
 {
+    int n = 4;
+    int arr1[] = {1, 1, 2, 2, 2};
+    int arr2[] = {2, 2, 3, 3, 4};
+    int arr3[] = {2, 3, 1, 3, 4};
+
+    for (int i = 1; i <= n; i++)
+    {
+        string edge = to_string(arr1[i]) + "@" + to_string(arr2[i]);
+        map[edge].push_back(arr2[i]);
+    }
+
+    string edge = "";
+    int maxIntrest = 0;
+    for (auto &p : map)
+    {
+        if (map[p.first].size() > maxIntrest)
+        {
+            edge = p.first;
+            maxIntrest = map[p.first].size();
+        }
+    }
+
+    int ans = 1;
+    string s = "";
+    for (int i = 0; i < edge.length(); i++)
+    {
+        if (edge[i] != '@')
+            s += edge[i];
+        else
+        {
+            stringstream val_(s);
+            int val = 0;
+            val_ >> val;
+            ans *= val;
+
+            s = "";
+        }
+    }
+
+    stringstream val_(s);
+    int val = 0;
+    val_ >> val;
+    ans *= val;
+
+    cout << ans << endl;
+
+    return 0;
 }
