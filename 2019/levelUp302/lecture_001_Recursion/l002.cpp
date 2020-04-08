@@ -264,8 +264,135 @@ void mazePathSet()
     // }
 }
 
+//queenSet.=====================================================
+
+int combinationQueen1D(vector<bool> &boxes, int qpsf, int tnq, int idx, string ans)
+{ //qpsf : queen place so far, tnq: total no of queen
+    if (qpsf == tnq)
+    {
+        cout << ans << endl;
+        return 1;
+    }
+
+    int count = 0;
+    for (int i = idx; i < boxes.size(); i++)
+    {
+        count += combinationQueen1D(boxes, qpsf + 1, tnq, i + 1, ans + "B" + to_string(i) + "Q" + to_string(qpsf) + " ");
+    }
+    return count;
+}
+
+int permutationQueen1D(vector<bool> &boxes, int qpsf, int tnq, string ans)
+{ //qpsf : queen place so far, tnq: total no of queen
+    if (qpsf == tnq)
+    {
+        cout << ans << endl;
+        return 1;
+    }
+
+    int count = 0;
+    for (int i = 0; i < boxes.size(); i++)
+    {
+        if (!boxes[i])
+        {
+            boxes[i] = true;
+            count += permutationQueen1D(boxes, qpsf + 1, tnq, ans + "B" + to_string(i) + "Q" + to_string(qpsf) + " ");
+            boxes[i] = false;
+        }
+    }
+    return count;
+}
+
+int combinationQueen2D(vector<vector<bool>> &boxes, int qpsf, int tnq, int idx, string ans)
+{ //qpsf : queen place so far, tnq: total no of queen
+    if (qpsf == tnq)
+    {
+        cout << ans << endl;
+        return 1;
+    }
+
+    int count = 0;
+    for (int i = idx; i < boxes.size() * boxes[0].size(); i++)
+    {
+        int x = i / boxes[0].size();
+        int y = i % boxes[0].size();
+        count += combinationQueen2D(boxes, qpsf + 1, tnq, i + 1, ans + "(" + to_string(x) + ", " + to_string(y) + ") ");
+    }
+    return count;
+}
+
+int permutationQueen2D(vector<vector<bool>> &boxes, int qpsf, int tnq, string ans)  // boolean[][]
+{ //qpsf : queen place so far, tnq: total no of queen
+    if (qpsf == tnq)
+    {
+        cout << ans << endl;
+        return 1;
+    }
+
+    int count = 0;
+    for (int i = 0; i < boxes.size() * boxes[0].size(); i++)
+    {
+        int x = i / boxes[0].size();
+        int y = i % boxes[0].size();
+        if (!boxes[x][y])
+        {
+            boxes[x][y] = true;
+            count += permutationQueen2D(boxes, qpsf + 1, tnq,  ans + "(" + to_string(x) + ", " + to_string(y) + ") ");
+            boxes[x][y] = false;
+        }
+    }
+    return count;
+}
+
+void queenSet()
+{
+    vector<bool> boxes(25, false);
+    cout << combinationQueen1D(boxes, 0, 3, 0, "");
+    // cout << permutationQueen1D(boxes, 0, 3, "");
+
+    
+    // vector<vector<bool>> boxes(5,vector<bool>(5,false));
+    // cout << combinationQueen2D(boxes, 0, 3, 0, "");
+    // cout << permutationQueen2D(boxes, 0, 3, "");
+}
+
+//leetcode 78
+vector<vector<int>> subsets(vector<int>& nums) {
+        vector<int> list;
+        return subset_(nums,0,list);
+    }
+    
+    vector<vector<int>> subset_(vector<int>& arr,int vidx,vector<int>& list){
+        if(vidx==arr.size()){
+            vector<vector<int>> base;
+            vector<int> ll(list); 
+            base.push_back(ll);
+            return base;
+        }
+        
+        
+        vector<vector<int>> ans;
+        
+        vector<vector<int>> left=subset_(arr,vidx+1,list);
+        for(vector<int> e: left) ans.push_back(e);
+        
+        
+        list.push_back(arr[vidx]);
+        vector<vector<int>> right=subset_(arr,vidx+1,list);
+        for(auto e: right) ans.push_back(e);
+        list.pop_back();
+        
+        
+        
+        return ans;
+        
+        
+    }
+
 int main()
 {
-    mazePathSet();
+    // mazePathSet();
+    queenSet();
+
     return 0;
 }
