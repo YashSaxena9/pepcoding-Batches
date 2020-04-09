@@ -1,4 +1,6 @@
 #include <iostream>
+#include <vector>
+#include <queue>
 using namespace std;
 
 struct ListNode
@@ -277,7 +279,7 @@ ListNode *mergeKLists(vector<ListNode *> &lists)
 
 int getDecimalValue(ListNode *head)
 {
-    head = reverse(head);
+    head = reverseList(head);
     int ans = 0;
     int mul = 1;
     while (head != nullptr)
