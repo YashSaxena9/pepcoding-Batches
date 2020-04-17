@@ -347,7 +347,7 @@ int permutationQueen1D_sub(vector<bool> &boxes, int idx, int qpsf, int tnq, stri
     if (!boxes[idx])
     {
         boxes[idx] = true;
-        count += permutationQueen1D_sub(boxes, 0, qpsf + 1, tnq, ans + "B" + to_string(i) + "Q" + to_string(qpsf) + " ");
+        count += permutationQueen1D_sub(boxes, 0, qpsf + 1, tnq, ans + "B" + to_string(idx) + "Q" + to_string(qpsf) + " ");
         boxes[idx] = false;
     }
     count += permutationQueen1D_sub(boxes, idx + 1, qpsf, tnq, ans);
@@ -649,8 +649,8 @@ void Nqueen()
 {
     // rowA=new boolean[n];
 
-    int n = 6;
-    int m = 6;
+    int n = 10;
+    int m = 4;
     rowA.resize(n, false);
     colA.resize(m, false);
     diag.resize(n + m - 1, false);
