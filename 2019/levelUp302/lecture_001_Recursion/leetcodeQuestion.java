@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 public class leetcodeQuestion{
  
     // leetcode 36==========================================
