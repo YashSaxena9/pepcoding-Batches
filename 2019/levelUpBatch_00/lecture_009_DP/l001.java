@@ -783,6 +783,107 @@ public class l001 {
 		return dp[0][0];
 	}
 
+	//leetcode: decode ways 91.======================================================
+	public int numDecodings_Rec(String s,int idx,int[] dp) {
+		if(idx==s.length()) return dp[idx]=1;
+		
+		char ch=s.charAt(idx);
+		int count=0;
+		
+		if(dp[idx]!=0) return dp[idx];
+
+		if(ch!='0')
+		   count+=numDecodings_Rec(s,idx+1,dp);
+
+		if(idx+1<s.length()){
+			char ch2=s.charAt(idx+1);
+			int val=(ch-'0')*10 + (ch2-'0');
+			  if(val>=10 && val<=26)
+			    count+=numDecodings_Rec(s,idx+2,dp);
+		}
+
+		return dp[idx]=count;		
+	}
+	
+	public int numDecodings_DP(String s,int[] dp) {
+		for(int idx=s.length();idx>=0;idx--){
+
+			if(idx==s.length()){
+				dp[idx]=1;
+				continue;
+			}
+
+			char ch=s.charAt(idx);
+			int count=0;
+			if(ch!='0')
+			   count+=dp[idx+1];
+	
+			if(idx+1<s.length()){
+				char ch2=s.charAt(idx+1);
+				int val=(ch-'0')*10 + (ch2-'0');
+				  if(val>=10 && val<=26)
+					count+=dp[idx+2];
+			}
+	
+		    dp[idx]=count;	
+		}
+
+		return dp[0];
+    }
+	
+	public int numDecodings(String s) {
+		int[] dp=new int[s.length()+1];
+		
+		// return numDecodings_Rec(s,0,dp);
+		return numDecodings_DP(s,dp);
+		
+	}
+	
+    public int numDecodingsII(String s) {
+		long[] dp=new long[s.length()+1];
+	
+	return (int)decodeWaysII(s,0,dp);
+}
+
+	static int m=(int)1e9+7;
+public static long decodeWaysII(String s,int idx,long[] dp){
+	if(idx==s.length()) return dp[idx]=1;
+
+	if(dp[idx]!=0) return dp[idx];
+	
+	long count=0;
+	char ch=s.charAt(idx);
+	if(ch=='*'){
+		count=(count + 9*decodeWaysII(s,idx+1,dp))%m;
+		if(idx+1< s.length()){
+			char ch2=s.charAt(idx+1);
+			if(ch2 >='0' && ch2<='6') count=(count + 2 * decodeWaysII(s,idx+2,dp))%m;
+			if(ch2>='7' && ch2<='9') count=(count + decodeWaysII(s,idx+2,dp))%m;
+			if(ch2=='*') count=(count + 15 * decodeWaysII(s,idx+2,dp))%m;
+		}
+		
+
+
+	}else if(ch!='0'){
+		  count=(count + decodeWaysII(s,idx+1,dp))%m;
+		 
+		  if(idx+1< s.length()){
+			  char ch2=s.charAt(idx+1);
+			  if(ch2=='*'){
+				  if(ch =='1') count=(count + 9 * decodeWaysII(s,idx+2,dp))%m;
+				  else if(ch=='2') count=(count + 6 * decodeWaysII(s,idx+2,dp))%m;
+
+
+			  }else{
+				int val=(ch-'0')*10 + (ch2-'0');
+				if(val<=26)
+				count=(count + decodeWaysII(s,idx+2,dp))%m;
+			  }
+		  }
+	}
+	return dp[idx]=count;
+}
+
 	//targetSet.===================================================================
 
 	public static int coinChangePermuatation_Rec(int[] coins, int tar) {
@@ -1122,50 +1223,193 @@ public class l001 {
 		return maxLen;
 	}
 	
-
 	// leetcode 673
 	public static int findNumberOfLIS(int[] arr) {
 		if(arr.length<=1) return arr.length;
 		
-		int[] dp=new int[arr.length];
-		int[] count=new int[arr.length];
-
 		int n=arr.length;
-		int maxLen=1;
+		int[] dp=new int[n];
+		int[] count=new int[n];
+		
+		int maxLen=0;
+		int maxCount=0;
+		
 		for(int i=0;i<n;i++){
 			dp[i]=1;
 			count[i]=1;
-			if(i==0) continue;
-
 			for(int j=0;j<i;j++){
-				if(arr[j]<arr[i]){
-					if(dp[i] < dp[j] + 1){
-					   dp[i]=dp[j]+1;
-					   count[i]=count[j];
-					}else if(dp[j]+1==dp[i]){
-						count[i]+=count[j];
-					}
+			  if(arr[i]>arr[j]){
+                 if(dp[j] + 1 > dp[i]){
+					 dp[i]=dp[j]+1;
+					 count[i]=count[j];
+				 }else if(dp[j]+1==dp[i]){
+					 count[i]+=count[j];
+				 }
+			  }	
+			}
+
+			if(dp[i]>maxLen){
+				maxLen=dp[i];
+				maxCount=count[i];
+			}else if(dp[i]==maxLen){
+				maxCount+=count[i];
+			}
+		}
+
+		return maxCount;
+
+		
+	}
+
+	//leetcode 354 =================================================
+
+	public static int maxEnvelopes(int[][] arr) {
+
+		Arrays.sort(arr,(a, b)->{ 
+			// 0'th index-> width and 1'st index -> height, 
+			// for C++: sort(arr.begin(),arr.end(),[](vector<int>& a,vector<int>& b){ //logic });
+			if(a[0]==b[0]) return b[1] - a[1];   // reverse sort.  for c++ replace '-' with '<'
+			else return a[0]-b[0];   // default sort.  for c++ replace '-' with '<'
+		});
+
+		int n=arr.length;
+		int[] dp=new int[n];
+		int maxLen = 0;
+		for (int i =0;i<n;i++) {
+			dp[i] = 1;
+			for (int j = 0; j < i; j++) { 
+				if (arr[i][1] > arr[j][1]) { // compare height. 
+					dp[i] = Math.max(dp[i], dp[j] + 1);
 				}
 			}
-		   maxLen = Math.max(maxLen, dp[i]);
+			maxLen = Math.max(maxLen, dp[i]);
 		}
 
-		for (int ele: dp) System.out.print(ele + " ");
-		System.out.println();
-		for (int ele: count) System.out.print(ele + " ");
-		System.out.println();
-
-		int ans=0;
-		for(int i=0;i<n;i++){
-			if(dp[i]==maxLen) ans+=count[i];
-		}
-
-		return ans;
+		return maxLen;
 	}
 	
-
 	
-	//leetcode 354 , 1235 
+	//cutTypeQuestion.=====================================================
+
+	public static int MCM_rec(int[] arr,int st,int end,int[][] dp){
+		if(st+1==end) return dp[st][end] = 0;
+		
+		if(dp[st][end]!=-1) return dp[st][end];
+
+        int min_=(int) 1e8;
+		for(int cut=st+1;cut<end;cut++){
+			int leftOptimalCost=MCM_rec(arr,st,cut,dp);
+			int rightOptimalCost=MCM_rec(arr,cut,end,dp);
+
+			int myCost=leftOptimalCost +  arr[st] * arr[cut] * arr[end]   + rightOptimalCost;
+            min_=Math.min(min_,myCost);
+		}
+
+		return dp[st][end]=min_;
+	}
+
+	public static int MCM_DP(int[] arr,int n,int[][] dp,String[][] sdp){
+		for(int gap=1;gap<n;gap++){
+			for(int st=0,end=gap;end<n;st++,end++){
+				if(st+1==end) {
+					dp[st][end] = 0;
+					sdp[st][end]=(char)(st+'A') + "";
+				    continue;
+				}
+
+				int min_=(int) 1e8;
+				String mins="";
+		        for(int cut=st+1;cut<end;cut++){
+			        int leftOptimalCost=dp[st][cut];
+			        int rightOptimalCost=dp[cut][end];
+
+			        int myCost=leftOptimalCost +  arr[st] * arr[cut] * arr[end]   + rightOptimalCost;
+					
+					if(myCost<min_){
+						min_=myCost;
+						mins=  "(" + sdp[st][cut]+sdp[cut][end] + ")";
+					}
+		        }
+
+				dp[st][end]=min_;
+				sdp[st][end]=mins;
+				
+			}
+
+		}
+		System.out.print(sdp[0][n-1] + " -> ");
+		return dp[0][n-1];
+	}
+
+	//leetcode 132.===========================================================
+	//Time: O(n3)
+	public static int minCut_(int st,int end,int[][] dp,boolean[][] isPalindrome){
+		if(st==end || isPalindrome[st][end]) return dp[st][end]=0; 
+		
+		if(dp[st][end]!=-1) return dp[st][end];
+
+        int min_=(int) 1e8;
+		for(int cut=st;cut<end;cut++){
+			int leftMinCut=isPalindrome[st][cut]?0:minCut_(st,cut,dp,isPalindrome);
+			int rightMinCut=isPalindrome[cut+1][end]?0:minCut_(cut+1,end,dp,isPalindrome);
+
+			int myCost=leftMinCut +  1   + rightMinCut;
+            min_=Math.min(min_,myCost);
+		}
+
+		return dp[st][end]=min_;
+	}
+
+    //Time: O(n2)
+	public static int minCut_02(int st,int end,int[] dp,boolean[][] isPalindrome){
+		if(st>end) return -1;
+		if(dp[st]!=-1) return dp[st];
+
+        int min_=(int) 1e8;
+		for(int cut = st;cut <=end;cut++){
+			if(isPalindrome[st][cut]){
+				int cuts_ = minCut_02(cut+1,end,dp,isPalindrome)+1;
+				min_=Math.min(min_,cuts_);
+			}
+		}
+
+		return dp[st]=min_;
+	}
+
+	public static int minCut_02_DP(int st,int end,int[] dp,boolean[][] isPalindrome){
+		for( st=end;st>=0;st--){
+			int min_=(int) 1e8;
+			for(int cut = st;cut <=end;cut++){
+				if(isPalindrome[st][cut]){
+					int cuts_ = (( cut + 1==end+1 )? -1 : dp[cut+1]) + 1;
+					min_=Math.min(min_, cuts_);
+				}
+			}
+	
+			dp[st]=min_;
+		}
+		return dp[0];
+	}
+
+
+	public static int minCut(String str) {
+		int n=str.length();
+		int[] dp=new int[n];
+		boolean[][] isPalindrome=new boolean[n][n];
+
+		for(int i=0;i<n;i++) dp[i]=-1;
+
+		for (int gap = 0; gap < n; gap++) {
+			for (int si = 0, ei = gap; ei < n; si++, ei++) {
+				if (gap == 0) isPalindrome[si][ei] = true;
+				else if (str.charAt(si) == str.charAt(ei) && gap == 1) isPalindrome[si][ei] = true;
+				else isPalindrome[si][ei] = str.charAt(si) == str.charAt(ei) && isPalindrome[si + 1][ei - 1];
+			}
+		}
+
+		return minCut_02(0,n-1,dp,isPalindrome);
+    }
+
 
 	public static void PathSeries() {
 		int er = 3;
@@ -1266,7 +1510,27 @@ public class l001 {
 		
 		System.out.println(ans);
 		// display(dp);
-    }
+	}
+
+	public static void cutType(){
+		int[] arr={10, 20, 30, 40, 30};
+		int ans=0;
+		int n=arr.length;
+
+		int[][] dp=new int[n][n];
+		String[][] sdp=new String[n][n];
+		for(int i=0;i<n;i++) for(int j=0;j<n;j++) dp[i][j]=-1;
+
+		// ans=MCM_rec(arr,0,n-1,dp);
+		// ans=MCM_DP(arr,n,dp,sdp);
+		String str="bbbbbb";
+		ans=minCut(str);
+
+
+		System.out.println(ans);
+		display2D(dp);
+	}
+	
 
 	//util.=================================================================
 
@@ -1290,6 +1554,8 @@ public class l001 {
 		// PathSeries();
 		// stringSet();
 		// targetSet();
-		LIS_Type();
+		// LIS_Type();
+		cutType();
+
 	}
 }
