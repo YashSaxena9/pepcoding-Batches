@@ -506,6 +506,8 @@ int numBusesToDestination(vector<vector<int>> &routes, int S, int T)
     return -1;
 }
 
+//leetcode 684.=====================================================
+
 vector<int> par;
 vector<int> setSize;
 
@@ -530,8 +532,6 @@ void mergeSet(int p1, int p2)
     }
 }
 
-//leetcode 684.=====================================================
-
 vector<int> findRedundantConnection(vector<vector<int>> &edges)
 {
     for (int i = 0; i <= edges.size(); i++)
@@ -540,7 +540,7 @@ vector<int> findRedundantConnection(vector<vector<int>> &edges)
         setSize.push_back(1);
     }
 
-    for (vector<int> `ar : edges)
+    for (vector<int> &ar : edges)
     {
         int u = ar[0];
         int v = ar[1];
