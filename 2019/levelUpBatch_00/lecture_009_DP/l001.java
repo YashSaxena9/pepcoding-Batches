@@ -783,8 +783,151 @@ public class l001 {
 		return dp[0][0];
 	}
 
+	//leetcode 940.=================================================================
+
+	public static int distinctSubseqII(String S) {
+		int[] dp=new int[S.length()+1];
+		int[] lastSeen=new int[26];
+		dp[0]=1;
+		int mod=(int)1e9+7;
+
+		for(int i=1;i<dp.length();i++){
+			dp[i] = (dp[i-1] * 2) % mod;
+			
+			int idx=S.charAt(i-1)-'a';
+			if(lastSeen[idx]!=0)
+				dp[i] -= dp[lastSeen[idx]-1];
+			
+				dp[i]%=mod;
+			lastSeen[idx]=i;
+		}
+
+		int ans = --dp[S.length()];
+		if(ans<0) ans+=mod;
+		return ans;
+	}
+	
+	//leetcode 338.=========================================================================
+	
+	public static int[] countingBits(int n){
+		int[] ans=new int[n+1];
+		for(int i=1;i<=n;i++){
+         ans[i] = ans[( i & (i-1) )]+1;
+		}
+		return ans;
+	}
+
+	//geeks: count-subsequences-of-type-ai-bj-ck=========================================
+
+	public static int countSubsequnence_AiBjCk(String str){
+		int emptyCount=1;
+		int aCount=0;
+		int bCount=0;
+		int cCount=0;
+
+		for(int i=0;i<str.length();i++){
+			char ch=str.charAt(i);
+			if(ch=='a')
+			  aCount = aCount + (emptyCount + aCount);  // exclude + include
+			
+			if(ch=='b')
+			  bCount = bCount + (aCount + bCount);  // exclude + include
+			
+			if(ch=='c')
+			  cCount = cCount + (bCount + cCount);  // exclude + include
+		}
+
+		return cCount;
+	}
+
+	// https://practice.geeksforgeeks.org/problems/mobile-numeric-keypad/0
+
+	public static int numericKeyPad_Rec(int n,int idx,int[][] dp,int[][] keyPad,int[][] dirA){
+		if(n==1) return dp[n][idx] = 1;  
+		
+		if(dp[n][idx]!=0) return dp[n][idx];
+		int r = idx / 3;
+		int c = idx % 3;
+		int count=0;
+		for(int d=0;d<dirA.length; d++){
+			int x = r + dirA[d][0];
+			int y = c + dirA[d][1]; 
+			if(x >= 0 && y >= 0 && x < 4 && y < 3 && keyPad[x][y] !=-1){
+				count+=numericKeyPad_Rec(n-1, x*3+y, dp, keyPad, dirA);  // count+=dp[n-1][x*3+y];
+			}
+		}
+
+		return dp[n][idx] = count;
+	}
+
+	public static void numericKeyPad(int n){
+		int[][] dp =new int[n+1][12]; 
+		int[][] keyPad ={
+						{1,2,3},
+						{4,5,6},
+						{7,8,9},
+						{-1,0,-1}};
+		int[][] dirA={{0,0},{1,0},{0,1},{-1,0},{0,-1}};
+
+		int sum=0;
+		for(int i=0;i<4;i++){
+			for(int j=0;j<3;j++){
+				if(keyPad[i][j]!=-1){
+					sum+=numericKeyPad_Rec(n , i * 3 + j,dp,keyPad, dirA);
+				}
+			}
+		}
+
+		return sum;
+	}
+
+	public static int numericKeyPad_DP(int N){   // N = 3 -> 138
+		int[][] dp =new int[N+1][12]; 
+		int[][] keyPad ={
+						{1,2,3},
+						{4,5,6},
+						{7,8,9},
+						{-1,0,-1}};
+		int[][] dirA={{0,0},{1,0},{0,1},{-1,0},{0,-1}};
+
+		int sum=0;
+		for(int n=1;n<4;n++){
+			for(int idx=0;idx<12;idx++){
+				int r = idx / 3;
+				int c = idx % 3;
+				
+				if(keyPad[r][c]==-1) continue;
+				
+				if(n==1){
+					dp[n][idx] = 1;
+					continue;
+				}  
+	
+		        int count=0;
+		        for(int d=0;d<dirA.length; d++){
+			        int x = r + dirA[d][0];
+			         int y = c + dirA[d][1]; 
+			         if(x >= 0 && y >= 0 && x < 4 && y < 3 && keyPad[x][y] !=-1){
+				        count+=dp[n-1][x*3+y];
+			    }
+		    }
+
+		     dp[n][idx] = count;
+			}
+		}
+
+		for(int i=0;i<12;i++){
+			sum+=dp[N][i];
+		}
+
+		return sum;
+	}
+
+
+
+
 	//leetcode: decode ways 91.======================================================
-	public int numDecodings_Rec(String s,int idx,int[] dp) {
+	public static int numDecodings_Rec(String s,int idx,int[] dp) {
 		if(idx==s.length()) return dp[idx]=1;
 		
 		char ch=s.charAt(idx);
@@ -805,7 +948,7 @@ public class l001 {
 		return dp[idx]=count;		
 	}
 	
-	public int numDecodings_DP(String s,int[] dp) {
+	public static int numDecodings_DP(String s,int[] dp) {
 		for(int idx=s.length();idx>=0;idx--){
 
 			if(idx==s.length()){
@@ -831,7 +974,7 @@ public class l001 {
 		return dp[0];
     }
 	
-	public int numDecodings(String s) {
+	public static int numDecodings(String s) {
 		int[] dp=new int[s.length()+1];
 		
 		// return numDecodings_Rec(s,0,dp);
@@ -839,14 +982,13 @@ public class l001 {
 		
 	}
 	
-    public int numDecodingsII(String s) {
-		long[] dp=new long[s.length()+1];
-	
-	return (int)decodeWaysII(s,0,dp);
-}
+    public static int numDecodingsII(String s) {
+		long[] dp=new long[s.length()+1]; 
+	    return (int)decodeWaysII(s,0,dp);
+    }
 
 	static int m=(int)1e9+7;
-public static long decodeWaysII(String s,int idx,long[] dp){
+    public static long decodeWaysII(String s,int idx,long[] dp){
 	if(idx==s.length()) return dp[idx]=1;
 
 	if(dp[idx]!=0) return dp[idx];
@@ -1408,7 +1550,103 @@ public static long decodeWaysII(String s,int idx,long[] dp){
 		}
 
 		return minCut_02(0,n-1,dp,isPalindrome);
+	}
+
+	public static int totalFreqinRange(int[] freq,int si,int ei){
+		int sum=0;
+		for(int i=si;i<=ei;i++){
+			sum+=freq[i];
+		}
+		return sum;
+	}
+	
+	public static void OBST_rec(int[] keys,int[] freq,int si,int ei,int[][] dp){
+		if(dp[si][ei]!=0) dp[si][ei];
+		
+		int min=(int)1e8;
+		for(int root=si;root<=ei;root++){
+			int leftSubTree=(root==st)?0:OBST_rec(keys, freq, si, root-1,dp);
+			int rightSubTree=(root==ei)?0:OBST_rec(keys,freq, root+1, ei,dp);
+
+			int myCost=leftSubTree + totalFreqinRange(freq,si,ei) + rightSubTree;
+			
+			min=Math.min(min,myCost);
+		}
+
+		
+		return dp[si][ei]=min;
+	}
+
+	public static int OBST_DP(int[] keys,int[] freq,int si,int ei,int[][] dp){
+		for(int gap=1;gap<n;gap++){
+			for( si=0,ei=gap;end<n;si++,ei++){
+				int min=(int)1e8;
+		        for(int root=si;root<=ei;root++){
+			        int leftSubTree=(root==st)?0:dp[si][root-1];
+			        int rightSubTree=(root==ei)?0:dp[root+1][ei];
+
+			        int myCost = leftSubTree + rightSubTree;
+			
+			        min=Math.min(min,myCost);
+		        }
+
+		        dp[si][ei]=min +  (min==(int)1e8? 0 : totalFreqinRange(freq,si,ei));
+
+			}
+		}
+	}
+
+
+	public static int wildCard_rec(String s,String p,int i,int j,int[][] dp){
+		if(i==s.length() && j==p.length()) return dp[i][j]=1;
+		if(i==s.length() || j==p.length()){
+			if( i!=s.length() ) return  dp[i][j]=0;
+			
+			return dp[i][j]= (p.charAt(j)=='*' && p.length() - j == 1)?1:0;
+		}
+
+		if(dp[i][j]!=-1) return dp[i][j];
+
+		char ch1=s.charAt(i);
+		char ch2=p.charAt(j);
+		boolean res=false;
+		if(ch1 == ch2 || ch2 == '?') res = wildCard_rec(s,p,i+1,j+1,dp)==1;
+		else if(ch2=='*'){
+			res = res || wildCard_rec(s,p,i,j+1,dp)==1;  // as a empty string mapping ('*' treated as a "").
+			res = res || wildCard_rec(s,p,i+1,j,dp)==1;  // sequence mapping.("*" treated as a substring).
+		}
+
+		return dp[i][j]=res?1:0;
+	}
+
+	public static String removeStar(String str){
+	  StringBuilder sb=new StringBuilder();
+	  boolean firstStar=false;
+	  for(int i=0;i<str.length();i++){
+		char ch=str.charAt(i);  
+		if(ch=='*'){
+			if(!firstStar) sb.append(ch);
+			firstStar=true;
+		}else{
+			sb.append(ch);
+			firstStar=false;
+		}
+	  }
+
+	 return sb.toString();
+	}
+
+	public static boolean isMatch(String s, String p) {
+		
+		p=removeStar(p);
+		int[][] dp=new int[s.length()+1][p.length()+1];
+		for(int i=0;i<s.length();i++) for(int j=0;j<p.length();j++) dp[i][j]=-1;
+		return  wildCard_rec(s,p,0,0,dp)==1;
     }
+
+
+
+
 
 
 	public static void PathSeries() {

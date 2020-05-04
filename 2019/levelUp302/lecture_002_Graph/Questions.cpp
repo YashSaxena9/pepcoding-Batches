@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
 using namespace std;
 
 //leetcode 130=======================================================================
@@ -169,4 +171,391 @@ int islandPerimeter(vector<vector<int>> &grid)
         }
     }
     return (4 * totalOnes - 2 * commonRegion);
+}
+
+//Leetcode : 1091.=========================================================
+
+int shortestPathBinaryMatrix(vector<vector<int>> &grid)
+{
+    int n = grid.size();
+    if (n == 0)
+        return -1;
+    int m = grid[0].size();
+    if (m == 0)
+        return -1;
+
+    if (grid[0][0] == 1 || grid[n - 1][m - 1] == 1)
+        return -1;
+
+    int dirA[8][2] = {{-1, -1}, {-1, 0}, {0, -1}, {-1, 1}, {1, -1}, {0, 1}, {1, 0}, {1, 1}};
+    queue<int> que;
+    que.push(0);
+    grid[0][0] = 1;
+
+    int level = 1;
+    while (que.size() != 0)
+    {
+        int size = que.size();
+        while (size-- > 0)
+        {
+            int rvtx = que.front();
+            que.pop();
+
+            int r = rvtx / m;
+            int c = rvtx % m;
+
+            if (r == n - 1 && c == m - 1)
+                return level;
+
+            for (int d = 0; d < 8; d++)
+            {
+                int x = r + dirA[d][0];
+                int y = c + dirA[d][1];
+
+                if (x >= 0 && x < n && y >= 0 && y < m && grid[x][y] == 0)
+                {
+                    que.push((x * m + y));
+                    grid[x][y] = 1;
+                }
+            }
+        }
+        level++;
+    }
+
+    return -1;
+}
+
+//leetcode 286.=============================================================
+
+void wallsAndGates(vector<vector<int>> &grid)
+{
+    if (grid.size() == 0 || grid[0].size() == 0)
+        return;
+
+    int n = grid.size();
+    int m = grid[0].size();
+
+    int dirA[4][2] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0}};
+    queue<int> que;
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            if (grid[i][j] == 0)
+                que.push((i * m + j));
+
+    int level = 1;
+    while (que.size() != 0)
+    {
+        int size = que.size();
+        while (size-- > 0)
+        {
+            int rvtx = que.front();
+            que.pop();
+
+            int r = rvtx / m;
+            int c = rvtx % m;
+
+            for (int d = 0; d < 4; d++)
+            {
+                int x = r + dirA[d][0];
+                int y = c + dirA[d][1];
+
+                if (x >= 0 && x < n && y >= 0 && y < m && grid[x][y] == 2147483647)
+                {
+                    que.push((x * m + y));
+                    grid[x][y] = level;
+                }
+            }
+        }
+        level++;
+    }
+}
+
+//leetcode 994.===========================================================
+
+int orangesRotting(vector<vector<int>> &grid)
+{
+    if (grid.size() == 0 || grid[0].size() == 0)
+        return;
+
+    int n = grid.size();
+    int m = grid[0].size();
+
+    int dirA[4][2] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0}};
+    queue<int> que;
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            if (grid[i][j] == 2)
+                que.push((i * m + j));
+
+    int level = 0;
+    while (que.size() != 0)
+    {
+        int size = que.size();
+        while (size-- > 0)
+        {
+            int rvtx = que.front();
+            que.pop();
+
+            int r = rvtx / m;
+            int c = rvtx % m;
+
+            for (int d = 0; d < 4; d++)
+            {
+                int x = r + dirA[d][0];
+                int y = c + dirA[d][1];
+
+                if (x >= 0 && x < n && y >= 0 && y < m && grid[x][y] == 1)
+                {
+                    que.push((x * m + y));
+                    grid[x][y] = 2;
+                }
+            }
+        }
+        level++;
+    }
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            if (grid[i][j] == 1)
+                return -1;
+
+    return level;
+}
+
+//leetcode 207============================================
+
+vector<int> kahnsAlgo(int n, vector<vector<int>> &graph, vector<vector<int>> &prerequisites)
+{
+
+    vector<int> indegree(n, 0);
+    for (vector<int> ar : prerequisites)
+        indegree[ar[1]]++;
+
+    queue<int> que;
+    for (int i = 0; i < n; i++)
+    {
+        if (indegree[i] == 0)
+            que.push(i);
+    }
+
+    vector<int> ans;
+    while (que.size() != 0)
+    {
+        int size = que.size();
+        while (size-- > 0)
+        {
+            int rvtx = que.front();
+            que.pop();
+
+            ans.push_back(rvtx);
+            for (int e : graph[rvtx])
+            {
+                if (--indegree[e] == 0)
+                {
+                    que.push(e);
+                }
+            }
+        }
+    }
+
+    return ans;
+}
+
+bool canFinish(int numCourses, vector<vector<int>> &prerequisites)
+{
+    vector<vector<int>> graph(numCourses, vector<int>());
+    for (vector<int> ar : prerequisites)
+        graph[ar[0]].push_back(ar[1]);
+
+    vector<int> ans = kahnsAlgo(numCourses, graph, prerequisites);
+
+    return ans.size() == numCourses;
+}
+
+//Leetcode 210.=========================================================
+
+vector<int> findOrder(int numCourses, vector<vector<int>> &prerequisites)
+{
+    vector<vector<int>> graph(numCourses, vector<int>());
+    for (vector<int> ar : prerequisites)
+        graph[ar[0]].push_back(ar[1]);
+
+    vector<int> ans = kahnsAlgo(numCourses, graph, prerequisites);
+
+    return ans.size() != numCourses ? {} : ans;
+}
+
+//leetcode 329==========================================================
+
+int longestIncreasingPath(vector<vector<int>> &matrix)
+{
+    if (matrix.size() == 0 || matrix[0].size() == 0)
+        return 0;
+    vector<vector<int>> dirA = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+
+    int n = matrix.size();
+    int m = matrix[0].size();
+
+    vector<vector<int>> indegree(n, vector<int>(m, 0));
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            for (int d = 0; d < 4; d++)
+            {
+                int x = i + dirA[d][0];
+                int y = j + dirA[d][1];
+                if (x >= 0 && x < n && y >= 0 && y < m && matrix[x][y] > matrix[i][j])
+                    indegree[x][y]++;
+            }
+        }
+    }
+
+    queue<int> que;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            if (indegree[i][j] == 0)
+                que.push(i * m + j);
+        }
+    }
+
+    int length = 0;
+    while (que.size() != 0)
+    {
+        int size = que.size();
+        while (size-- > 0)
+        {
+            int rvtx = que.front();
+            que.pop();
+
+            int i = rvtx / m;
+            int j = rvtx % m;
+
+            for (int d = 0; d < 4; d++)
+            {
+                int x = i + dirA[d][0];
+                int y = j + dirA[d][1];
+                if (x >= 0 && x < n && y >= 0 && y < m && matrix[x][y] > matrix[i][j] && --indegree[x][y] == 0)
+                    que.push(x * m + y);
+            }
+        }
+        length++;
+    }
+
+    return length;
+}
+
+//leetcode 815.=======================================================
+
+int numBusesToDestination(vector<vector<int>> &routes, int S, int T)
+{
+    if (routes.size() == 0)
+        return -1;
+    unordered_map<int, vector<int>> map;
+    for (int i = 0; i < routes.size(); i++)
+    {
+        for (int ele : routes[i])
+        {
+            map[ele].push_back(i);
+        }
+    }
+
+    unordered_set<int> busStandVis;
+    vector<bool> busVis(routes.size(), false);
+
+    queue<int> que;
+    que.push(S);
+    int level = 0;
+    busStandVis.insert(S);
+
+    while (que.size() != 0)
+    {
+        int size = que.size();
+        while (size-- > 0)
+        {
+            int stand = que.front();
+            que.pop();
+
+            if (stand == T)
+                return level;
+
+            for (int bus : map[stand])
+            {
+                if (busVis[bus])
+                    continue;
+
+                for (int busStand : routes[bus])
+                {
+                    if (busStandVis.count(busStand) == 0)
+                    {
+                        que.push(busStand);
+                        busStandVis.insert(busStand);
+                    }
+                }
+                busVis[bus] = true;
+            }
+        }
+        level++;
+    }
+
+    return -1;
+}
+
+vector<int> par;
+vector<int> setSize;
+
+int findPar(int vtx)
+{
+    if (par[vtx] == vtx)
+        return vtx;
+    return par[vtx] = findPar(par[vtx]);
+}
+
+void mergeSet(int p1, int p2)
+{
+    if (setSize[p1] < setSize[p2])
+    {
+        par[p1] = p2;
+        setSize[p2] += setSize[p1];
+    }
+    else
+    {
+        par[p2] = p1;
+        setSize[p1] += setSize[p2];
+    }
+}
+
+//leetcode 684.=====================================================
+
+vector<int> findRedundantConnection(vector<vector<int>> &edges)
+{
+    for (int i = 0; i <= edges.size(); i++)
+    {
+        par.push_back(i);
+        setSize.push_back(1);
+    }
+
+    for (vector<int> `ar : edges)
+    {
+        int u = ar[0];
+        int v = ar[1];
+        int p1 = findPar(u);
+        int p2 = findPar(v);
+
+        if (p1 != p2)
+        {
+            mergeSet(p1, p2);
+        }
+        else
+        {
+            return ar;
+        }
+    }
+
+    return {};
 }
