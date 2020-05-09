@@ -548,14 +548,330 @@ vector<int> findRedundantConnection(vector<vector<int>> &edges)
         int p2 = findPar(v);
 
         if (p1 != p2)
-        {
             mergeSet(p1, p2);
-        }
         else
-        {
             return ar;
-        }
     }
 
     return {};
 }
+
+//leetcode : 547 ===================================================
+
+int findCircleNum(vector<vector<int>> &arr)
+{
+
+    int n = arr.size();
+    //declare se;f as parent.
+    for (int i = 0; i < n; i++)
+    {
+        par.push_back(i);
+        setSize.push_back(1);
+    }
+    int count = n;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (arr[i][j] != 0 && i != j) // if direct friendship.
+            {
+                int p1 = findPar(i);
+                int p2 = findPar(j);
+                if (p1 != p2)
+                {
+                    count--;
+                    mergeSet(p1, p2);
+                }
+            }
+        }
+    }
+
+    return count;
+}
+
+//leetcode 1061.=================================================
+
+string smallestEquivalentString(string A, string B, string S)
+{
+
+    for (int i = 0; i < 26; i++)
+        par.push_back(i);
+    for (int i = 0; i < A.length(); i++)
+    {
+        int p1 = findPar(A[i] - 'a');
+        int p2 = findPar(B[i] - 'a');
+        par[p1] = min(p1, p2);
+        par[p2] = min(p1, p2);
+    }
+
+    string ans = "";
+    for (int i = 0; i < S.length(); i++)
+        ans += (char)(findPar(S[i] - 'a') + 'a');
+
+    return ans;
+}
+
+//leetcode 200.=================================================
+
+int numIslands(vector<vector<char>> &grid)
+{
+    int n = grid.size();
+    int m = grid[0].size();
+
+    int noOfOnces = 0;
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+        {
+            par.push_back(i * m + j);
+            if (grid[i][j] == '1')
+                noOfOnces++;
+        }
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            if (grid[i][j] == '1')
+            {
+                if (j + 1 < m && grid[i][j + 1] == '1')
+                {
+                    int p1 = findPar(i * m + j);
+                    int p2 = findPar(i * m + j + 1);
+                    if (p1 != p2)
+                    {
+                        par[p1] = p2;
+                        noOfOnces--;
+                    }
+                }
+
+                if (i + 1 < n && grid[i + 1][j] == '1')
+                {
+                    int p1 = findPar(i * m + j);
+                    int p2 = findPar((i + 1) * m + j);
+                    if (p1 != p2)
+                    {
+                        par[p1] = p2;
+                        noOfOnces--;
+                    }
+                }
+            }
+        }
+    }
+
+    return noOfOnces;
+}
+
+//leetcode 839.================================================================
+
+bool isSimilar(string &p, string &q)
+{
+    int count = 0;
+    for (int i = 0; i < p.length(); i++)
+    {
+        if (p[i] != q[i] && ++count > 2)
+            return false;
+    }
+    return true;
+}
+
+int numSimilarGroups(vector<string> &A)
+{
+    int n = A.size();
+    for (int i = 0; i < n; i++)
+        par.push_back(i);
+
+    int groups = n;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = i + 1; j < n; j++)
+        {
+            if (isSimilar(A[i], A[j]))
+            {
+                int p1 = findPar(i);
+                int p2 = findPar(j);
+                if (p1 != p2)
+                {
+                    par[p1] = p2;
+                    groups--;
+                }
+            }
+        }
+    }
+    return groups;
+}
+
+// leetcode 1168.===================================================
+
+int minCostToSupplyWater(int n, vector<int> &wells, vector<vector<int>> &pipes)
+{
+    for (int i = 0; i < wells.size(); i++)
+    {
+        pipes.push_back({0, (i + 1), wells[i]});
+        par.push_back(i);
+    }
+    par.push_back(wells.size());
+
+    sort(pipes.begin(), pipes.end(), [](vector<int> &a, vector<int> &b) {
+        return a[2] < b[2];
+    });
+
+    int cost = 0;
+    for (vector<int> &p : pipes)
+    {
+        int p1 = findPar(p[0]);
+        int p2 = findPar(p[1]);
+
+        if (p1 != p2)
+        {
+            cost += p[2];
+            par[p1] = p2;
+        }
+    }
+
+    return cost;
+}
+
+//Hacker earth: https://www.hackerearth.com/practice/algorithms/graphs/minimum-spanning-tree/practice-problems/algorithm/mr-president/
+
+int mrPresident()
+{
+    lli n, m, k;
+    cin >> n >> m >> k;
+
+    vector<vector<int>> graph, kruskalGraph;
+    while (m--)
+    {
+        int u, v, w;
+        cin >> u >> v >> w;
+        vector<int> ar = {u, v, w};
+        graph.push_back(ar);
+    }
+
+    sort(graph.begin(), graph.end(), [](vector<int> &a, vector<int> &b) {
+        return a[2] < b[2];
+    });
+
+    for (int i = 0; i <= n; i++)
+        par.push_back(i);
+
+    lli MSTCost = 0;
+    for (vector<int> g : graph)
+    {
+        int p1 = findPar(g[0]);
+        int p2 = findPar(g[1]);
+        if (p1 != p2)
+        {
+            par[p1] = p2;
+            kruskalGraph.push_back(g);
+            MSTCost += g[2];
+        }
+    }
+
+    int componentCount = 0;
+    for (int i = 1; i <= n; i++)
+        if (par[i] == i && ++componentCount > 1)
+            return -1;
+
+    int superRoad = 0;
+    for (int i = kruskalGraph.size() - 1; i >= 0; i--)
+    {
+        if (MSTCost <= k)
+            break;
+        MSTCost = MSTCost - kruskalGraph[i][2] + 1;
+        superRoad++;
+    }
+
+    return MSTCost <= k ? superRoad : -1;
+}
+
+auto SpeedUp = []() {
+    std::ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+    return 0;
+}();
+
+//Hackerrank: https://www.hackerrank.com/challenges/journey-to-the-moon/problem
+
+lli dfs_JourneyToMoon(vector<vector<int>> &graph, int src, vector<bool> &vis)
+{
+    vis[src] = true;
+    int count = 0;
+    for (int e : graph[src])
+        if (!vis[e])
+            count += dfs_JourneyToMoon(graph, e, vis);
+
+    return count + 1;
+}
+
+lli JourneyToMoon_UsingDFS()
+{
+    int n, p;
+    cin >> n >> p;
+    vector<vector<int>> graph(n, vector<int>());
+    while (p-- > 0)
+    {
+        int u, v;
+        cin >> u >> v;
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    
+    vector<bool> vis(n, 0);
+    vector<lli> countrySize;
+    
+    int WorldPopulation = n;
+    lli ans = 0;
+    
+    for (int i = 0; i < n; i++)
+        if (!vis[i])
+            countrySize.push_back((dfs_JourneyToMoon(graph, i, vis)));
+
+    for (int ele : countrySize)
+    {
+        ans += ele * (WorldPopulation - ele);
+        WorldPopulation -= ele;
+    }
+    return ans;
+}
+
+lli JourneyToMoon_UnionFind()
+{
+    int n, p;
+    cin >> n >> p;
+
+    for (int i = 0; i < n; i++)
+        par.push_back(i);
+    while (p-- > 0)
+    {
+        int u, v;
+        cin >> u >> v;
+
+        int p1 = findPar(u);
+        int p2 = findPar(v);
+
+        par[p1] = min(p1, p2);
+        par[p2] = min(p1, p2);
+    }
+
+    vector<lli> countrySize(n, 0);
+
+    int WorldPopulation = n;
+    for (int i = 0; i < n; i++)
+        countrySize[findPar(i)]++;
+
+    lli ans = 0;
+    for (int i = 0; i < n; i++)
+    {
+        if (par[i] == i)
+        {
+            ans += countrySize[i] * (WorldPopulation - countrySize[i]);
+            WorldPopulation -= countrySize[i];
+        }
+    }
+
+    return ans;
+}
+
+//question link: https://leetcode.com/problems/minimize-malware-spread/discuss/614031/C++-:-Union-Find-(pepcoding.com)-reframe-the-question-on-"CORONA"-with-relatable-explanation
+]
