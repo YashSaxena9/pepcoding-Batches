@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Arrays;
 public class l001{
 
     public static void main(String[] args){
@@ -529,21 +530,182 @@ public static void rightView(Node node){
         }
     }
 
+    for(int ele: ans)
+       System.out.println(ele);
+    System.out.println();
+}
+
+
+public static void bottomView(Node node){
+    width(node,0);
+    int[] ans=new int[rightMaxValue - leftMinValue + 1];
+
+    LinkedList<pairVO> que=new LinkedList<>();
+    que.addLast(new pairVO(node,-leftMinValue));
+
+    while(que.size()!=0){
+        int size=que.size();
+        while(size--> 0){
+            pairVO rpair=que.removeFirst();
+            ans[rpair.vl] = rpair.node.data;
+            if(rpair.node.left!=null) que.addLast(new pairVO(rpair.node.left, rpair.vl - 1));
+            if(rpair.node.right!=null) que.addLast(new pairVO(rpair.node.right,rpair.vl + 1));    
+        }
+    }
+
+    for(int ele: ans)
+       System.out.println(ele);
+    System.out.println();
+}
+
+public static void topView(Node node){
+    width(node,0);
+    int[] ans=new int[rightMaxValue - leftMinValue + 1];
+    Arrays.fill(ans,(int)-1e8);
+
+    LinkedList<pairVO> que=new LinkedList<>();
+    que.addLast(new pairVO(node,-leftMinValue));
+
+    while(que.size()!=0){
+        int size=que.size();
+        while(size--> 0){
+            pairVO rpair=que.removeFirst();
+            
+            if(ans[rpair.vl] == (int)-1e8)
+              ans[rpair.vl] = rpair.node.data;
+            
+              if(rpair.node.left!=null) que.addLast(new pairVO(rpair.node.left, rpair.vl - 1));
+            if(rpair.node.right!=null) que.addLast(new pairVO(rpair.node.right,rpair.vl + 1));    
+        }
+    }
+
+   for(int ele: ans)
+       System.out.println(ele);
+    System.out.println();
+}
+
+static int leftDMinValue=0;
+public static void widthDiagonal(Node node,int lev){
+    if(node==null) return;
+
+    leftMinValue=Math.min(leftMinValue,lev);
+
+    width(node.left, lev - 1);
+    width(node.right, lev + 0);
+} 
+
+
+public static void diagonalOrder(Node node){
+    widthDiagonal(node,0);
+    int n= -leftDMinValue + 1;
+    ArrayList<ArrayList<Integer>> ans=new ArrayList<>(); // vector<vector<int>> (n,vector<int>());
+    for(int i=0;i<n;i++)
+      ans.add(new ArrayList<>());
+   
+
+    LinkedList<pairVO> que=new LinkedList<>();
+    que.addLast(new pairVO(node,-leftMinValue));
+
+    while(que.size()!=0){
+        int size=que.size();
+        while(size--> 0){
+            pairVO rpair=que.removeFirst();
+            ans.get(rpair.vl).add(rpair.node.data);
+            if(rpair.node.left!=null) que.addLast(new pairVO(rpair.node.left, rpair.vl - 1));
+            if(rpair.node.right!=null) que.addLast(new pairVO(rpair.node.right,rpair.vl + 0));    
+        }
+    }
+
     for(ArrayList<Integer> ar: ans)
        System.out.println(ar);
     System.out.println();
 }
 
+public static void diagonalSum(Node node){
+    widthDiagonal(node,0);
+    int n= -leftDMinValue + 1;
+    int[] ans=new int[n];
+
+    LinkedList<pairVO> que=new LinkedList<>();
+    que.addLast(new pairVO(node,-leftMinValue));
+
+    while(que.size()!=0){
+        int size=que.size();
+        while(size--> 0){
+            pairVO rpair=que.removeFirst();
+            ans[rpair.vl] += rpair.node.data;
+            if(rpair.node.left!=null) que.addLast(new pairVO(rpair.node.left, rpair.vl - 1));
+            if(rpair.node.right!=null) que.addLast(new pairVO(rpair.node.right,rpair.vl + 0));    
+        }
+    }
+
+    for(int ele: ans)
+       System.out.println(ele);
+    System.out.println();
+}
+
+static Node DLLhead=null;
+static Node DLLprev=null;
+
+public static void DLL(Node node){
+     if(node==null) return;
+     
+     DLL(node.left);
+     
+     if(DLLhead==null){
+        DLLhead=node;
+     }else{
+         DLLprev.right=node;
+         node.left=DLLprev;
+     }
+      DLLprev=node;
+
+     DLL(node.right);
+     
+    }
+
+   public static class allSolution{
+       int height = 0;
+       int size=0;
+       boolean find=false;
+
+       Node pred=null;
+       Node succ=null;
+       Node prev=null;
+   }
+
+   public static void allSol(Node node,int data,int level,allSolution pair){
+    if(node==null) return;
+    pair.size++;
+    pair.height=Math.max(pair.height,level);
+    pair.find= pair.find || node.data==data;
+    
+    if(node.data==data && pair.pred==null) pair.pred=prev;
+    if(pair.prev!=null && pair.prev.data == data && pair.succ==null) pair.succ=node;
+    pair.prev=node;
+    
+     allSol(node.left,data,level+1,pair);
+     allSol(node.right,data,level+1,pair);
+   }
+
+
+  public static void set2(Node node){
+    DLL(node);
+    while(DLLhead!=null){
+        System.out.print(DLLhead.data+ " ");
+        DLLhead=DLLhead.right;
+    }
+  }
 
 
    public static void view(Node node){
     //    leftView(node);
     //    rightView(node);
-       verticalOrder(node);
+    //    verticalOrder(node);
+    //    bottomView(node);
+    //    topView(node);
 
    }
-
-
 
    public static void levelOrder(Node node){
     // levelOrder_00(node);
@@ -575,6 +737,7 @@ public static void rightView(Node node){
        display(root);
     //    set1(root);
     //    levelOrder(root);
-           view(root);
+        //    view(root);
+        set2(root);
    }
 }
