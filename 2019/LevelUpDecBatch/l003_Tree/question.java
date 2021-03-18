@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedList;
 
 public class question {
     public class TreeNode {
@@ -478,4 +479,522 @@ public class question {
         b.val = temp;
     }
 
+    public static class allSolPair {
+        TreeNode prev = null;
+        TreeNode pred = null;
+        TreeNode succ = null;
+
+        int ceil = (int) 1e8;
+        int floor = -(int) 1e8;
+    }
+
+    public static void allSolution(TreeNode node, int data, allSolPair pair) {
+        if (node == null)
+            return;
+
+        if (node.val < data)
+            pair.floor = Math.max(pair.floor, node.val);
+
+        if (node.val > data)
+            pair.ceil = Math.min(pair.ceil, node.val);
+
+        allSolution(node.left, data, pair);
+
+        if (node.val == data && pair.pred == null)
+            pair.pred = pair.prev;
+        if (pair.prev != null && pair.prev.val == data && pair.succ == null)
+            pair.succ = node;
+
+        pair.prev = node;
+
+        allSolution(node.right, data, pair);
+    }
+
+    // 173
+    class BSTIterator {
+        LinkedList<TreeNode> st = new LinkedList<>(); // addFirst(), removeFirst();
+
+        public BSTIterator(TreeNode root) {
+            addAllLeft(root);
+        }
+
+        public void addAllLeft(TreeNode node) {
+            if (node == null)
+                return;
+
+            TreeNode curr = node;
+            while (curr != null) {
+                st.addFirst(curr);
+                curr = curr.left;
+            }
+
+        }
+
+        public int next() {
+            TreeNode rn = st.removeFirst();
+            addAllLeft(rn.right);
+            return rn.val;
+        }
+
+        public boolean hasNext() {
+            return st.size() != 0;
+        }
+    }
+
+    // 510
+    public Node inorderSuccessor(Node node) {
+
+        if (node.right != null) {
+            node = node.right;
+            while (node.left != null)
+                node = node.left;
+
+            return node;
+        } else {
+            while (node != null) {
+                if (node.parent != null && node.parent.left == node) {
+                    return node.parent;
+                }
+                node = node.parent;
+            }
+
+            return null;
+        }
+    }
+
+    // T -> avg : O(nlogn), worst : O(n^2).
+    // psi = pre starting index, isi = in-order starting index.
+    public TreeNode preInTree(int[] preorder, int psi, int pei, int[] inorder, int isi, int iei) {
+        if (psi > pei)
+            return null;
+
+        TreeNode node = new TreeNode(preorder[psi]);
+
+        int idx = isi;
+        while (inorder[idx] != preorder[psi])
+            idx++;
+
+        int tnel = idx - isi; // total no of elements.
+
+        node.left = preInTree(preorder, psi + 1, psi + tnel, inorder, isi, idx - 1);
+        node.right = preInTree(preorder, psi + tnel + 1, pei, inorder, idx + 1, iei);
+
+        return node;
+    }
+
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        return preInTree(preorder, 0, preorder.length - 1, inorder, 0, inorder.length - 1);
+    }
+
+    // 106
+    public TreeNode postInTree(int[] post, int psi, int pei, int[] in, int isi, int iei) {
+        if (psi > pei)
+            return null;
+
+        TreeNode node = new TreeNode(post[pei]);
+        int idx = isi;
+        while (in[idx] != post[pei])
+            idx++;
+
+        int tnel = idx - isi;
+
+        node.left = postInTree(post, psi, psi + tnel - 1, in, isi, idx - 1);
+        node.right = postInTree(post, psi + tnel, pei - 1, in, idx + 1, iei);
+
+        return node;
+    }
+
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        int n = postorder.length;
+        return postInTree(postorder, 0, n - 1, inorder, 0, n - 1);
+    }
+
+    // 889
+    public TreeNode postPreTree(int[] post, int ppsi, int ppei, int[] pre, int psi, int pei) {
+        if (psi > pei)
+            return null;
+
+        TreeNode node = new TreeNode(pre[psi]);
+
+        if (psi == pei)
+            return node;
+
+        int idx = ppsi;
+        while (post[idx] != pre[psi + 1])
+            idx++;
+
+        int tnel = idx - ppsi + 1;
+        node.left = postPreTree(post, ppsi, idx, pre, psi + 1, psi + tnel);
+        node.right = postPreTree(post, idx + 1, ppei - 1, pre, psi + tnel + 1, pei);
+
+        return node;
+    }
+
+    public TreeNode constructFromPrePost(int[] pre, int[] post) {
+        int n = post.length;
+
+        return postPreTree(post, 0, n - 1, pre, 0, n - 1);
+    }
+
+    // 114, T -> O(n^2)
+    public TreeNode getTail(TreeNode root) {
+        if (root == null)
+            return null;
+        TreeNode curr = root;
+        while (curr.right != null) {
+            curr = curr.right;
+        }
+
+        return curr;
+
+    }
+
+    public void flatten(TreeNode root) {
+        if (root == null)
+            return;
+
+        flatten(root.left);
+        flatten(root.right);
+
+        TreeNode tail = getTail(root.left);
+        if (tail != null) {
+            tail.right = root.right;
+            root.right = root.left;
+            root.left = null;
+        }
+    }
+
+    // T -> O(n)
+    public TreeNode flattern_(TreeNode node) {
+        if (node == null || (node.left == null && node.right == null))
+            return node;
+
+        TreeNode leftTail = flattern_(node.left);
+        TreeNode rightTail = flattern_(node.right);
+
+        if (leftTail != null) {
+            leftTail.right = node.right;
+            node.right = node.left;
+            node.left = null;
+        }
+
+        return rightTail != null ? rightTail : leftTail;
+    }
+
+    public void flatten(TreeNode root) {
+        if (root == null)
+            return;
+        flattern_(root);
+    }
+
+    Node dummy = new Node(-1);
+    Node prev = dummy;
+
+    public void treeToDoublyList_(Node root) {
+        if (root == null)
+            return;
+
+        treeToDoublyList_(root.left);
+
+        prev.right = root;
+        root.left = prev;
+
+        prev = root;
+
+        treeToDoublyList_(root.right);
+
+    }
+
+    public Node treeToDoublyList(Node root) {
+
+        if (root == null)
+            return root;
+        treeToDoublyList_(root);
+
+        Node head = dummy.right;
+        head.left = null;
+        dummy.right = null;
+
+        prev.right = head;
+        head.left = prev;
+        return head;
+
+    }
+
+    int idx = 0;
+
+    public TreeNode createTree(int[] arr) {
+        if (idx == arr.length || arr[idx] == -1) {
+            idx++;
+            return null;
+        }
+        TreeNode node = new TreeNode(arr[idx++]);
+        node.left = createTree(arr);
+        node.right = createTree(arr);
+
+        return node;
+    }
+
+    public void serializeTree(TreeNode node, ArrayList<Integer> arr) {
+        if (node == null) {
+            arr.add(-1);
+            return;
+        }
+
+        arr.add(node.val);
+        serializeTree(node.left, arr);
+        serializeTree(node.right, arr);
+    }
+
+    public static TreeNode rightMostNode(TreeNode next, TreeNode curr) {
+        while (next.right != null && next.right != curr)
+            next = next.right;
+
+        return next;
+    }
+
+    public static void morrisInOrderTraversal(TreeNode root) {
+        TreeNode curr = root;
+        while (curr != null) {
+            TreeNode next = curr.left;
+            if (next == null) {
+                System.out.print(curr.val + " ");
+                curr = curr.right;
+            } else {
+                TreeNode rightMost = rightMostNode(next, curr);
+                if (rightMost.right == null) { // thread create
+                    rightMost.right = curr;
+                    curr = curr.left;
+                } else { // thread break
+                    rightMost.right = null;
+                    System.out.print(curr.val + " ");
+                    curr = curr.right;
+                }
+            }
+        }
+    }
+
+    public static void morrisPreOrderTraversal(TreeNode root) {
+        TreeNode curr = root;
+        while (curr != null) {
+            TreeNode next = curr.left;
+            if (next == null) {
+                System.out.print(curr.val + " ");
+                curr = curr.right;
+            } else {
+                TreeNode rightMost = rightMostNode(next, curr);
+                if (rightMost.right == null) { // thread create
+                    rightMost.right = curr;
+                    System.out.print(curr.val + " ");
+                    curr = curr.left;
+                } else { // thread break
+                    rightMost.right = null;
+                    curr = curr.right;
+                }
+            }
+        }
+    }
+
+    public static class tPair {
+        TreeNode node = null;
+        boolean selfDone = false;
+        boolean leftDone = false;
+        boolean rightDone = false;
+
+        tPair(TreeNode node, boolean selfDone, boolean leftDone, boolean rightDone) {
+            this.node = node;
+            this.selfDone = selfDone;
+            this.leftDone = leftDone;
+            this.rightDone = rightDone;
+        }
+    }
+
+    public static void IterTraversal(TreeNode root) {
+        LinkedList<tPair> ll = new LinkedList<>();
+        ll.addFirst(new tPair(root, false, false, false));
+        while (ll.size() != 0) {
+            tPair pair = ll.getFirst();
+            if (!pair.leftDone) {
+                pair.leftDone = true;
+                if (pair.node.left != null)
+                    ll.addFirst(new tPair(pair.node.left, false, false, false));
+
+            } else if (!pair.selfDone) {
+                pair.selfDone = true;
+                System.out.print(pair.node.val + " ");
+            } else if (!pair.rightDone) {
+                pair.rightDone = true;
+                if (pair.node.right != null)
+                    ll.addFirst(new tPair(pair.node.right, false, false, false));
+            } else {
+                ll.removeFirst();
+            }
+        }
+    }
+
+    // 1008
+    // lr -> left range, rr = right range
+    int bst_idx = 0;
+
+    public TreeNode constructBSTFromPreOrder(int[] arr, int lr, int rr) {
+        if (bst_idx == arr.length || arr[bst_idx] < lr || arr[bst_idx] > rr)
+            return null;
+
+        TreeNode node = new TreeNode(arr[bst_idx++]);
+        node.left = constructBSTFromPreOrder(arr, lr, node.val);
+        node.right = constructBSTFromPreOrder(arr, node.val, rr);
+
+        return node;
+    }
+
+    public TreeNode bstFromPreorder(int[] preorder) {
+        return constructBSTFromPreOrder(preorder, -(int) 1e8, (int) 1e8);
+    }
+
+    public class levelPair {
+        TreeNode par = null;
+        int lb = -(int) 1e8;
+        int rb = (int) 1e8;
+
+        levelPair() {
+
+        }
+
+        levelPair(TreeNode par, int lb, int rb) {
+            this.par = par;
+            this.lb = lb;
+            this.rb = rb;
+        }
+    }
+
+    public TreeNode constructBSTFromLevel(int[] arr) {
+        int idx = 0;
+        LinkedList<levelPair> que = new LinkedList<>();
+        que.add(new levelPair());
+        TreeNode root = null;
+
+        while (que.size() != 0 && idx < arr.length) {
+            levelPair pair = que.removeFirst();
+
+            if (arr[idx] < pair.lb || arr[idx] > pair.rb)
+                continue;
+
+            TreeNode node = new TreeNode(arr[idx++]);
+            if (pair.par == null)
+                root = node;
+            else {
+                if (node.val < pair.par.val)
+                    pair.par.left = node;
+                else
+                    pair.par.right = node;
+            }
+
+            que.addFirst(new levelPair(node, pair.lb, node.val));
+            que.addFirst(new levelPair(node, node.val, pair.rb));
+        }
+
+    }
+
+    // 230
+    public int kthSmallest(TreeNode root, int k) {
+        TreeNode curr = root;
+        while (curr != null) {
+            TreeNode next = curr.left;
+
+            if (next == null) {
+                if (k == 1)
+                    return curr.val;
+                k--;
+                curr = curr.right;
+
+            } else {
+                TreeNode rightMost = rightMostNode(next, curr);
+                if (rightMost.right == null) { // thread create
+                    rightMost.right = curr;
+                    curr = curr.left;
+                } else { // thread break
+                    rightMost.right = null;
+                    if (k == 1)
+                        return curr.val;
+                    k--;
+                    curr = curr.right;
+
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    // 437
+    int ans = 0;
+
+    public void pathSumIII(TreeNode node, HashMap<Integer, Integer> map, int tar, int prefixSum) {
+        if (node == null)
+            return;
+
+        prefixSum += node.val;
+        ans += map.getOrDefault(prefixSum - tar, 0);
+
+        map.put(prefixSum, map.getOrDefault(prefixSum, 0) + 1);
+
+        pathSumIII(node.left, map, tar, prefixSum);
+        pathSumIII(node.right, map, tar, prefixSum);
+
+        map.put(prefixSum, map.get(prefixSum) - 1);
+        if (map.get(prefixSum) == 0)
+            map.remove(prefixSum);
+    }
+
+    public int pathSum(TreeNode root, int K) {
+        // prefix sum , Frequency
+        HashMap<Integer, Integer> map = new HashMap<>();
+        map.put(0, 1);
+        pathSumIII(root, map, K, 0);
+        return ans;
+    }
+
+    public class pair {
+        TreeNode node = null;
+        long w = 0;
+
+        pair(TreeNode node, long w) {
+            this.node = node;
+            this.w = w;
+        }
+    }
+
+    // 662
+    public int widthOfBinaryTree(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        LinkedList<pair> que = new LinkedList<>();
+        que.addLast(new pair(root, 1));
+        int ans = 0;
+
+        while (que.size() != 0) {
+            int size = que.size();
+            long fi = que.getFirst().w;
+            long li = que.getFirst().w;
+
+            while (size-- > 0) {
+                pair p = que.removeFirst();
+
+                TreeNode node = p.node;
+                long w = p.w;
+                li = w;
+
+                if (node.left != null)
+                    que.addLast(new pair(node.left, 2 * w));
+                if (node.right != null)
+                    que.addLast(new pair(node.right, 2 * w + 1));
+
+            }
+
+            ans = Math.max(ans, (int) (li - fi + 1));
+        }
+
+        return ans;
+    }
 }
