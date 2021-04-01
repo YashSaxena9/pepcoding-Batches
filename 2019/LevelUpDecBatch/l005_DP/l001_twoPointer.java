@@ -1,7 +1,7 @@
 import java.util.Arrays;
 import java.util.LinkedList;
 
-public class l001 {
+public class l001_twoPointer {
 
     public static void print1D(int[] arr) {
         for (int ele : arr) {
@@ -441,6 +441,260 @@ public class l001 {
         // System.out.println(maxGold);
     }
 
+    // 91
+    int numDecodings(String s, int idx, int[] dp) {
+        if (idx == s.length()) {
+            return dp[idx] = 1;
+        }
+
+        if (dp[idx] != -1)
+            return dp[idx];
+
+        char ch1 = s.charAt(idx);
+        if (ch1 == '0')
+            return 0;
+
+        int count = 0;
+        count += numDecodings(s, idx + 1, dp);
+
+        if (idx < s.length() - 1) {
+            char ch2 = s.charAt(idx + 1);
+            int num = (ch1 - '0') * 10 + (ch2 - '0');
+            if (num <= 26)
+                count += numDecodings(s, idx + 2, dp);
+        }
+        return dp[idx] = count;
+    }
+
+    int numDecodings_DP(String s, int IDX, int[] dp) {
+        for (int idx = s.length(); idx >= 0; idx--) {
+            if (idx == s.length()) {
+                dp[idx] = 1;
+                continue;
+            }
+
+            char ch1 = s.charAt(idx);
+            if (ch1 == '0') {
+                dp[idx] = 0;
+                continue;
+            }
+
+            int count = 0;
+            count += a;// numDecodings(s, idx + 1, dp);
+
+            if (idx < s.length() - 1) {
+                char ch2 = s.charAt(idx + 1);
+                int num = (ch1 - '0') * 10 + (ch2 - '0');
+                if (num <= 26)
+                    count += b;// numDecodings(s, idx + 2, dp);
+            }
+            dp[idx] = count;
+        }
+
+        return dp[IDX];
+    }
+
+    int numDecodings_Opti(String s) {
+        int a = 1, b = 0;
+        for (int idx = s.length() - 1; idx >= 0; idx--) {
+
+            int count = 0;
+            char ch1 = s.charAt(idx);
+            if (ch1 != '0') {
+
+                count += a;
+
+                if (idx < s.length() - 1) {
+                    char ch2 = s.charAt(idx + 1);
+                    int num = (ch1 - '0') * 10 + (ch2 - '0');
+                    if (num <= 26)
+                        count += b;
+                }
+            }
+            b = a;
+            a = count;
+        }
+
+        return a;
+    }
+
+    int numDecodings(String s) {
+        int[] dp = new int[s.length() + 1];
+        Arrays.fill(dp, -1);
+        int ans = numDecodings(s, 0, dp);
+
+        for (int ele : dp)
+            System.out.print(ele + " ");
+        return ans;
+    }
+
+    // 639
+    long numDecodings_memo(String s, int idx, long[] dp) {
+
+        if (idx == s.length()) {
+            return dp[idx] = 1;
+        }
+
+        if (dp[idx] != -1)
+            return dp[idx];
+        if (s.charAt(idx) == '0') {
+            return 0;
+        }
+
+        long count = 0;
+        char ch1 = s.charAt(idx);
+
+        if (s.charAt(idx) == '*') {
+            count = (count + 9 * numDecodings_memo(s, idx + 1, dp)) % mod;
+            if (idx < s.length() - 1) {
+                char ch2 = s.charAt(idx + 1);
+                if (ch2 == '*')
+                    count = (count + 15 * b) % mod;
+                else if (ch2 >= '0' && ch2 <= '6')
+                    count = (count + 2 * b) % mod;
+                else if (ch2 > '6')
+                    count = (count + b) % mod;
+
+            }
+        } else {
+            count = (count + numDecodings_memo(s, idx + 1, dp)) % mod;
+            if (idx < s.length() - 1) {
+                if (s.charAt(idx + 1) != '*') {
+                    char ch2 = s.charAt(idx + 1);
+                    int num = (ch1 - '0') * 10 + (ch2 - '0');
+                    if (num <= 26)
+                        count = (count + b) % mod;
+                } else {
+                    if (s.charAt(idx) == '1')
+                        count = (count + 9 * b) % mod;
+                    else if (s.charAt(idx) == '2')
+                        count = (count + 6 * b) % mod;
+                }
+            }
+        }
+
+        return dp[idx] = count;
+    }
+
+    long numDecodings_dp(String s, int IDX, long[] dp) {
+        for (int idx = s.length(); idx >= 0; idx--) {
+            if (idx == s.length()) {
+                dp[idx] = 1;
+                continue;
+            }
+
+            if (s.charAt(idx) == '0') {
+                dp[idx] = 0;
+                continue;
+            }
+
+            long count = 0;
+            char ch1 = s.charAt(idx);
+
+            if (s.charAt(idx) == '*') {
+                count = (count + 9 * a) % mod;
+                if (idx < s.length() - 1) {
+                    char ch2 = s.charAt(idx + 1);
+                    if (ch2 == '*')
+                        count = (count + 15 * b) % mod;
+                    else if (ch2 >= '0' && ch2 <= '6')
+                        count = (count + 2 * b) % mod;
+                    else if (ch2 > '6')
+                        count = (count + b) % mod;
+
+                }
+            } else {
+                count = (count + a) % mod;
+                if (idx < s.length() - 1) {
+                    if (s.charAt(idx + 1) != '*') {
+                        char ch2 = s.charAt(idx + 1);
+                        int num = (ch1 - '0') * 10 + (ch2 - '0');
+                        if (num <= 26)
+                            count = (count + b) % mod;
+                    } else {
+                        if (s.charAt(idx) == '1')
+                            count = (count + 9 * b) % mod;
+                        else if (s.charAt(idx) == '2')
+                            count = (count + 6 * b) % mod;
+                    }
+                }
+            }
+
+            dp[idx] = count;
+        }
+
+        return (int) dp[IDX];
+    }
+
+    long numDecodings_opti(String s) {
+        long a = 1, b = 0;
+        for (int idx = s.length() - 1; idx >= 0; idx--) {
+
+            long count = 0;
+            char ch1 = s.charAt(idx);
+            if (ch1 == '0') {
+                count = 0;
+            } else if (ch1 == '*') {
+                count = (count + 9 * a) % mod;
+                if (idx < s.length() - 1) {
+                    char ch2 = s.charAt(idx + 1);
+                    if (ch2 == '*')
+                        count = (count + 15 * b) % mod;
+                    else if (ch2 >= '0' && ch2 <= '6')
+                        count = (count + 2 * b) % mod;
+                    else if (ch2 > '6')
+                        count = (count + b) % mod;
+
+                }
+            } else {
+                count = (count + a) % mod;
+                if (idx < s.length() - 1) {
+                    if (s.charAt(idx + 1) != '*') {
+                        char ch2 = s.charAt(idx + 1);
+                        int num = (ch1 - '0') * 10 + (ch2 - '0');
+                        if (num <= 26)
+                            count = (count + b) % mod;
+                    } else {
+                        if (s.charAt(idx) == '1')
+                            count = (count + 9 * b) % mod;
+                        else if (s.charAt(idx) == '2')
+                            count = (count + 6 * b) % mod;
+                    }
+                }
+            }
+
+            b = a;
+            a = count;
+        }
+
+        return (int) a;
+    }
+
+    int numDecodings_II(String s) {
+        long[] dp = new long[s.length() + 1];
+        Arrays.fill(dp, -1);
+        long ans = numDecodings_memo(s, 0, dp);
+        return (int) ans;
+    }
+
+    // https://www.geeksforgeeks.org/count-number-of-ways-to-partition-a-set-into-k-subsets/
+    public static int noOfWays(int n, int k, int[][] dp) {
+        if (k == 1) {
+            return dp[n][k] = 1;
+        }
+        if (n == k) {
+            return dp[n][k] = 1;
+        }
+
+        if (dp[n][k] != 0)
+            return dp[n][k];
+
+        int uniqueGroup = noOfWays(n - 1, k - 1, dp);
+        int partOfExisGroup = noOfWays(n - 1, k, dp) * k;
+
+        return dp[n][k] = uniqueGroup + partOfExisGroup;
+    }
+
     public static void main(String[] args) {
         // fibo();
         // mazePath();
@@ -449,5 +703,3 @@ public class l001 {
         // countFriendsPairings(10);
         goldMine();
     }
-
-}
